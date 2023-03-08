@@ -1,31 +1,32 @@
-name: "Test"
+name: "check"
 on:
   push:
 jobs:
-  env:
+  pre-check:
     runs-on: ubuntu-latest
     steps:
-    - run: env	
-  pwd:
-    runs-on: ubuntu-latest
-    steps:
-    - run: pwd
-  precheck:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v17
-      with:
-        extra_nix_config: |
-          access-tokens = github.com=${{ secrets.TOKEN }}
-    - run: true # cd $( mktemp --directory ) && git init && git config user.name "No User" && git config user.email "noone@nothing" && nix flake init && sed -e "s#\${IMPLEMENTATION}#github:nextmoose/argue#" -e "s#\${TEST}#github:nextmoose/argue-test#" -e "wflake.nix" ${GITHUB_WORKSPACE}/.github/workflows/original.nix && git add flake.nix && git commit --all --allow-empty-message --message "" && cat flake.nix && nix develop --command check ""
+      - uses: cachix/install-nix-action@a4b8aaf5a24260b643f571235829e53e6b3cc920
+      - uses: nextmoose/test-action@eef4910e8ed5b796ffc68397185d0292e1c52cf3
+        with:
+          implementation-url: github:nextmoose/argue
+          implementation-postulate: false
+          test-url: github:nextmoose/argue-test
+          test-postulate: false
+          test-rev: 
+          test-defect:
+          postulate: true
   check:
-    needs: precheck
     runs-on: ubuntu-latest
+    needs: pre-check
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v17
-      with:
-        extra_nix_config: |
-          access-tokens = github.com=${{ secrets.TOKEN }}
-    - run: true # cd $( mktemp --directory ) && git init && git config user.name "No User" && git config user.email "noone@nothing" && nix flake init && sed -e "s#\${IMPLEMENTATION}#github:nextmoose/argue#" -e "s#\${TEST}#${GITHUB_WORKSPACE}#" -e "wflake.nix" ${GITHUB_WORKSPACE}/.github/workflows/original.nix && git add flake.nix && git commit --all --allow-empty-message --message "" && cat flake.nix && nix develop --command check ""
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@a4b8aaf5a24260b643f571235829e53e6b3cc920
+      - uses: nextmoose/test-action@eef4910e8ed5b796ffc68397185d0292e1c52cf3
+        with:
+          implementation-url: github:nextmoose/argue
+          implementation-postulate: false
+          test-url: github:nextmoose/argue-test
+          test-postulate: true
+          test-rev: 
+          test-defect:
+          postulate: true
